@@ -1,7 +1,7 @@
 /*
 fetch_interfaces retrieves information about interfaces on an Arista box.
 
-If the ifName interface doesn't have its primary IP set to ipAddress/mask, it will be configured.
+If the ifName interface doesn't have its primary IP set to ipAddress, it will be configured.
 */
 package main
 
@@ -48,13 +48,13 @@ func showInterfaces(node *goeapi.Node) (*module.ShowInterface, error) {
 }
 
 // hasIP determines if the provided interface has the specified primary IP address.
-func hasPrimaryIP(name string, node *goeapi.Node) (bool, error) {
+func hasPrimaryIP(node *goeapi.Node, name, ip string) (bool, error) {
 	iface := module.IPInterface(node)
 	cfg, err := iface.Get(name)
 	if err != nil {
 		return false, err
 	}
-	return cfg.Address() == ipAddress, nil
+	return cfg.Address() == ip, nil
 }
 
 // setPrimaryIP sets the primary IP address on an interface.
@@ -78,7 +78,7 @@ func main() {
 	}
 	fmt.Printf("ShowInterfaces:\n%s\n\n", pretty.Sprint(si))
 
-	hasIP, err := hasPrimaryIP(ifName, node)
+	hasIP, err := hasPrimaryIP(node, ifName, ipAddress)
 	if err != nil {
 		panic(err)
 	}
